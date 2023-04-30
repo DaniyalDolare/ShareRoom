@@ -69,7 +69,7 @@ export default function Home() {
   }
 
   return (
-    <div>
+    <div id="root">
       <Navbar bg="white" expand="lg">
         <Container>
           <Navbar.Brand href="#home">ShareRoom</Navbar.Brand>
@@ -78,15 +78,19 @@ export default function Home() {
           </Nav>
         </Container>
       </Navbar>
-      <Container>
+      <Container className="home-container">
         <Row className="my-auto">
-          <Col xs={12} md={12} lg={6} className="my-auto text-center">
-            <h1 className="mb-4">Share without any care</h1>
+          <Col xs={12} md={12} lg={6} className="my-auto text-start">
+            <h1 className="mb-4">
+              Share without any <span style={{ color: '#ff725c' }}>care</span>
+            </h1>
             <p>
               Seamless sharing of text and file data.
               <br />
+              <br />
               Anonymous rooms eliminating the need to share personal
               information.
+              <br />
               <br />
               Secure data sharing using password encryption.
             </p>

@@ -14,6 +14,14 @@ import {
   updateDoc,
   deleteDoc,
 } from 'firebase/firestore';
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+  list,
+} from 'firebase/storage';
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -31,12 +39,43 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage = getStorage(app);
+
+function uploadFile(roomId, file, setPercent, setFileUrl) {
+  const storageRef = ref(storage, `/files/${roomId}/${file.name}`);
+  const uploadTask = uploadBytesResumable(storageRef, file);
+
+  if (!file) {
+    alert('Please choose a file first!');
+  }
+
+  uploadTask.on(
+    'state_changed',
+    (snapshot) => {
+      const percent = Math.round(
+        (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+      );
+
+      // update progress
+      console.log('percent:=========== ', percent);
+      setPercent(percent);
+    },
+    (err) => console.log(err),
+    () => {
+      // download url
+      getDownloadURL(uploadTask.snapshot.ref).then((url) => {
+        console.log('URL:=========== ', url);
+        setFileUrl(url);
+      });
+    }
+  );
+}
 
 async function sendMessage(roomId, type, text) {
   try {
     await addDoc(collection(db, 'rooms', roomId, 'messages'), {
       type: type,
-      message: text.trim(),
+      message: text,
       time: serverTimestamp(),
     });
   } catch (error) {
@@ -83,6 +122,11 @@ async function getRoomData(roomCode) {
 async function deleteRoom(roomCode) {
   const docRef = doc(db, 'rooms', roomCode);
   await deleteDoc(docRef);
+  const storageRef = ref(storage, `/files/${roomCode}`);
+  (await list(storageRef)).items.forEach(async (fileRef) => {
+    console.log(fileRef.fullPath);
+    await deleteObject(fileRef);
+  });
   console.log('room deleted');
 }
 
@@ -132,4 +176,5 @@ export {
   createRoom,
   getCurrentTime,
   deleteRoom,
+  uploadFile,
 };
