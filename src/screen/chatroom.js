@@ -23,25 +23,16 @@ export default function Chatroom(props) {
   const [isShareOpen, setShareOpen] = useState(false);
   const [showUploadDialog, setUploadDialog] = useState(false);
 
-  const handleTextareaInput = () => {
-    console.log('============input======== ', editable.current.scrollHeight);
-    if (editable.current.scrollHeight < 150) {
+  const handleTextareaInputHeight = () => {
+    if (editable.current.scrollHeight < 150 || editable.current.value === '') {
       editable.current.style.height = 'auto';
       editable.current.style.height = `${editable.current.scrollHeight}px`;
       chatInput.current.style.maxHeight = `calc(${editable.current.scrollHeight}px + 2em)`;
-      console.log('ediatble: ', editable.current.style.height);
-      console.log('chatInput: ', chatInput.current.style.maxHeight);
     } else {
       editable.current.style.height = `150px`;
       chatInput.current.style.maxHeight = `calc(150px + 2em)`;
     }
   };
-
-  // useEffect(() => {
-  //   editable.current.style.height = 'auto';
-  //   editable.current.style.height = `${editable.current.scrollHeight}px`;
-  //   chatInput.current.style.maxHeight = `calc(${editable.current.scrollHeight}px + 2em)`;
-  // });
 
   useEffect(() => {
     if (roomId !== '') {
@@ -57,10 +48,12 @@ export default function Chatroom(props) {
   const handleCloseShareDialog = () => setShareOpen(false);
   const handleShowShareDialog = () => setShareOpen(true);
 
-  const addUploadFileMessage = (fileName, fileUrl) => {
-    sendMessage(roomId, 'file', { fileName: fileName, fileUrl: fileUrl }).then(
-      () => console.log('file message sent')
-    );
+  const addUploadFileMessage = (fileName, fileUrl, fileSize) => {
+    sendMessage(roomId, 'file', {
+      fileName: fileName,
+      fileUrl: fileUrl,
+      fileSize: fileSize,
+    }).then(() => console.log('file message sent'));
   };
 
   return (
@@ -126,21 +119,21 @@ export default function Chatroom(props) {
               id="autoresizing"
               className="auto-resizing-textarea"
               placeholder="Type message..."
-              onInput={handleTextareaInput}
+              onInput={handleTextareaInputHeight}
               style={{ maxHeight: '150px' }}
             />
             <button
               className="icon-btn"
               onClick={() => {
                 const val = editable.current.value;
-                if (val === '') {
+                if (val.trim() === '') {
                   return;
                 }
                 sendMessage(roomId, 'text', val).then(() =>
                   console.log('message sent')
                 );
                 editable.current.value = '';
-                handleTextareaInput();
+                handleTextareaInputHeight();
               }}
             >
               <MdSend />
@@ -157,11 +150,27 @@ function ChatMessage({ message }) {
   const time = useRef(null);
   const downloadLink = useRef(null);
 
+  const convertBytesToSize = (bytes) => {
+    const kilobytes = bytes / 1024;
+    const megabytes = kilobytes / 1024;
+
+    if (megabytes >= 1) {
+      return `${megabytes.toFixed(2)} MB`;
+    } else if (kilobytes >= 1) {
+      return `${kilobytes.toFixed(2)} KB`;
+    } else {
+      return `${bytes} bytes`;
+    }
+  };
+
   useEffect(() => {
     if (message['type'] === 'text') {
       text.current.innerHTML = message['message'];
     } else {
-      text.current.innerHTML = message['message']['fileName'];
+      text.current.innerHTML = `
+        ${message['message']['fileName']} (${convertBytesToSize(
+        message['message']['fileSize']
+      )})`;
     }
     if (message.time != null)
       time.current.innerHTML = new Date(

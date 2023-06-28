@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './../App.css';
 import { isRoomExists, createRoom } from '../services/firebase';
 import { useNavigate } from 'react-router-dom';
+import Center from './center';
 
 export default function CreateRoom() {
   const [roomId, setRoomId] = useState('');
@@ -29,12 +30,16 @@ export default function CreateRoom() {
         console.log('room created in firebase', new Date());
         navigate(roomCode, { replace: true });
       });
-      // console.log(isRoomCodeUnique('eN5pEbAoZjBvPaTBhiv9'));
     }
     if (roomId === '') {
       generateRoom();
     }
   }, []);
 
-  return <div>Creating room.. {roomId}</div>;
+  return (
+    <Center>
+      {' '}
+      <div>Creating room.. {roomId}</div>
+    </Center>
+  );
 }

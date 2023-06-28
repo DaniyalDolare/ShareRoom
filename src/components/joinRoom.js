@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Chatroom from '../screen/chatroom';
 import { isRoomExists, getLiveRoomData } from '../services/firebase';
+import Center from './center';
 
 export default function JoinRoom() {
   const EXPIRETIME = 600;
-  const navigate = useNavigate();
   const params = useParams();
   const [loading, setLoading] = useState(true);
   const [exists, setExists] = useState(false);
-  const [valid, setValid] = useState(false);
   const [remainingTime, setRemainingTime] = useState(null);
   const [roomData, setRoomData] = useState(null);
   const [roomDeleted, setRoomDeleted] = useState(false);
@@ -19,29 +18,10 @@ export default function JoinRoom() {
       const exists = await isRoomExists(roomId);
       console.log('room exists: ' + exists);
       if (exists) {
-        // const data = await getRoomData(roomId);
-        // await getCurrentTime(setCurrentTime);
-        // const now = new Date();
-        // const expirationTime = new Date(
-        //   data.createdtime.seconds * 1000 +
-        //     data.createdtime.nanoseconds / 1000000 +
-        //     600000
-        // );
-        // setExpiryTime(expirationTime);
-        // const remainingTime = Math.round((expirationTime - now) / 1000);
-        // console.log('RemainingTime: ', remainingTime);
-        // setRemainingTime(remainingTime);
-        // if (remainingTime <= 0) {
-        //   setValid(false);
-        //   console.log('expire');
-        // } else {
-        //   setValid(true);
-        // }
         setLoading(false);
         setExists(true);
       } else {
         setExists(false);
-        setValid(false);
         setLoading(false);
       }
     }
@@ -89,30 +69,41 @@ export default function JoinRoom() {
       console.log('RemainingTime: ', remainingTime);
       setRemainingTime(remainingTime);
       if (remainingTime <= 0) {
-        setValid(false);
         console.log('expire');
-      } else {
-        setValid(true);
       }
     }
   }, [roomData]);
 
-  return loading === false ? (
-    exists === true ? (
-      roomDeleted === true ? (
-        <div>Room has ended</div>
-      ) : roomData === null || remainingTime === null ? (
+  if (loading === true) {
+    return (
+      <Center>
         <div>Joining</div>
-      ) : (
-        <Chatroom
-          roomId={params.roomId}
-          duration={remainingTime}
-        ></Chatroom>
-      )
-    ) : (
-      <div>Room with code {params.roomId} does not exists</div>
-    )
-  ) : (
-    <div>Joining</div>
-  );
+      </Center>
+    );
+  }
+  if (exists === true) {
+    if (roomDeleted === true) {
+      return (
+        <Center>
+          <div>Room has ended</div>
+        </Center>
+      );
+    } else if (roomData === null || remainingTime === null) {
+      return (
+        <Center>
+          <div>Joining</div>
+        </Center>
+      );
+    } else {
+      return (
+        <Chatroom roomId={params.roomId} duration={remainingTime}></Chatroom>
+      );
+    }
+  } else {
+    return (
+      <Center>
+        <div>Room with code {params.roomId} does not exists</div>
+      </Center>
+    );
+  }
 }

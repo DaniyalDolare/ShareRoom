@@ -6,7 +6,6 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import CreateRoom from './components/createRoom';
 import JoinRoom from './components/joinRoom';
-import Temp from './components/temp';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -14,7 +13,6 @@ root.render(
     <Routes>
       <Route path="/" element={<App />} />
       <Route path="/room" element={<CreateRoom />} />
-      <Route path="/temp" element={<Temp />} />
       <Route path="/room/:roomId" element={<JoinRoom />} />
     </Routes>
   </BrowserRouter>

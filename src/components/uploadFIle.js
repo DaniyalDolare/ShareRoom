@@ -63,7 +63,7 @@ export default function UploadFileDialog(props) {
     console.log('upload stats: ', uploadPercent, fileUrl);
     if (uploadPercent === 100 && fileUrl !== null) {
       console.log('upload complete');
-      props.onUpload(file.name, fileUrl);
+      props.onUpload(file.name, fileUrl, file.size);
       setFile(null);
       setUploadPercent(null);
       setFileUrl(null);
